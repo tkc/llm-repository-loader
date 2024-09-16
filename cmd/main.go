@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/tkc/llm-repository-loader/internal"
 	"os"
 	"path/filepath"
 	"strings"
-	"tkc/llm-repository-loader/internal"
 )
 
 func main() {
