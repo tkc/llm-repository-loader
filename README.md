@@ -19,13 +19,13 @@ Command-line Options
 ## Examples
 
 Processing a local repository:
-```bash
+```go
 go run main.go -local_repo_path /path/to/local/repository
 ```
 
 Downloading and processing a GitHub repository:
 
-```bash
+```go
 go run main.go -remote_repo tkc/go_bedrock_proxy_server
 ```
 
@@ -42,11 +42,77 @@ output/
 ## Output
 
 ```txt
+
 ----
-<relative-file-path>
-<file-contents>
+internal/repository.go
+package internal
+
+import (
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+)
+
+func ProcessRepository(repoPath string, ignoreList []string, outputFile *os.File) {
+	err := filepath.Walk(repoPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !info.IsDir() {
+			relativeFilePath, err := filepath.Rel(repoPath, path)
+			if err != nil {
+				return err
+			}
+
+			if !ShouldIgnore(relativeFilePath, ignoreList) {
+				contents, err := ioutil.ReadFile(path)
+				if err != nil {
+					return err
+				}
+
+				_, err = outputFile.WriteString("----\n")
+				if err != nil {
+					return err
+				}
+				_, err = outputFile.WriteString(fmt.Sprintf("%s\n", relativeFilePath))
+				if err != nil {
+					return err
+				}
+				_, err = outputFile.WriteString(fmt.Sprintf("%s\n", contents))
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		fmt.Printf("Error processing repository: %v\n", err)
+	}
+}
+
 ----
+internal/utils.go
+package internal
+
+import (
+	"runtime"
+	"strings"
+)
+
+func IsWindows() bool {
+	return runtime.GOOS == "windows"
+}
+
+func ToWindowsPath(path string) string {
+	return strings.ReplaceAll(path, "/", "\\")
+}
+
 ```
+
 
 If a preamble is provided, it will be included at the beginning of the output file.
 
