@@ -120,7 +120,7 @@ func extractZip(zipFilePath, destDir string) error {
 		if err != nil {
 			return err
 		}
-		//defer outFile.Close()
+		defer outFile.Close()
 
 		rc, err := file.Open()
 		if err != nil {
